@@ -32,7 +32,7 @@ class NetworkManager {
                     return data
                 }
                 .decode(type: T.self, decoder: JSONDecoder())
-                .receive(on: RunLoop.main)
+                .receive(on: DispatchQueue.main)
                 .sink(receiveCompletion: { (completion) in
                     if case let .failure(error) = completion {
                         switch error {
