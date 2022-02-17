@@ -30,27 +30,32 @@ class PhotoResultsViewModel: ObservableObject {
         
         let trimmedWord = trimSearchWord(word: seacrhWord)
         
-        NetworkManager.shared.getData(query: trimmedWord, id: PhotoResultsViewModel.accessKey, type: Photo.self)
-            .sink { [self] completion in
-                isLoading = false
-                searchWord = seacrhWord
-                switch completion {
-                case .failure(let err):
-                    errorMessage = err.localizedDescription
-                    print("Error is \(err.localizedDescription)")
-                case .finished:
-                    print("Finished")
-                }
-            }
-    receiveValue: { [weak self] photoData in
-        guard let results = photoData.results else { return }
-        
-        if results.count > 0 {
-            self?.photoResult = results
+        if trimmedWord.isEmpty {
+            isLoading = false
+            errorMessage = "Please enter a valid search word"
         } else {
-            self?.errorMessage = "Sorry, No images found"
+            NetworkManager.shared.getData(query: trimmedWord, id: PhotoResultsViewModel.accessKey, type: Photo.self)
+                .sink { [self] completion in
+                    isLoading = false
+                    searchWord = seacrhWord
+                    switch completion {
+                    case .failure(let err):
+                        errorMessage = err.localizedDescription
+                        print("Error is \(err.localizedDescription)")
+                    case .finished:
+                        print("Finished")
+                    }
+                }
+        receiveValue: { [weak self] photoData in
+            guard let results = photoData.results else { return }
+            
+            if results.count > 0 {
+                self?.photoResult = results
+            } else {
+                self?.errorMessage = "Sorry, No images found"
+            }
         }
-    }
-    .store(in: &cancellables)
+        .store(in: &cancellables)
+        }
     }
 }

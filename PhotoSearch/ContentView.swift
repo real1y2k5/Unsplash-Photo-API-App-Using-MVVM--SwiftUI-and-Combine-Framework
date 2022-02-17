@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var photoResultsViewModel = PhotoResultsViewModel()
+    @StateObject var photoResultsViewModel = PhotoResultsViewModel()
     
     var body: some View {
         if photoResultsViewModel.isLoading {
