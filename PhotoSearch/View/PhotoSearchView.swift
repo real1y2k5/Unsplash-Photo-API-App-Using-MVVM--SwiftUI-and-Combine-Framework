@@ -12,19 +12,16 @@ struct PhotoSearchView: View {
     
     @StateObject var photoResultsViewModel: PhotoResultsViewModel
     @State private var searchText = ""
-    @State private var appMessage = "Unsplash Photo App"
     
     var body: some View {
         NavigationView {
-            Text(appMessage)
+            Text("Unsplash Photo App")
                 .multilineTextAlignment(.center)
                 .padding()
                 .navigationTitle("Photo Search")
                 .searchable(text: $searchText)
                 .onSubmit(of: .search) {
-                    if searchText.count >  0 {
-                        photoResultsViewModel.getPhotoData(seacrhWord: searchText)
-                    }
+                    photoResultsViewModel.getPhotoData(seacrhWord: searchText)
                 }
         }
         

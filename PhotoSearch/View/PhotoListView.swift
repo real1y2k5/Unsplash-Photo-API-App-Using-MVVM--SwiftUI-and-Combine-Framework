@@ -18,15 +18,21 @@ struct PhotoListView: View {
                 ForEach(photoResultsViewModel.photoResult, id: \.id) {  result in
                     PhotoCell(photoResult: result)
                 }
+                .onDelete(perform: removeRow)
             }
             .listStyle(PlainListStyle())
             .navigationTitle("Photo Search Results")
+            .toolbar {
+                EditButton()
+            }
             .searchable(text: $searchText)
             .onSubmit(of: .search) {
-                if searchText.count >  0 {
-                    photoResultsViewModel.getPhotoData(seacrhWord: searchText)
-                }
+                photoResultsViewModel.getPhotoData(seacrhWord: searchText)
             }
         }
+    }
+    
+    private func removeRow(at offsets: IndexSet) {
+        photoResultsViewModel.photoResult.remove(atOffsets: offsets)
     }
 }
