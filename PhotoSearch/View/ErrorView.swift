@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ErrorView: View {
     
-    @ObservedObject var photoResultsViewModel: PhotoResultsViewModel
+    @StateObject var photoResultsViewModel: PhotoResultsViewModel
     @Environment(\.presentationMode) var presentation
     
     var body: some View {

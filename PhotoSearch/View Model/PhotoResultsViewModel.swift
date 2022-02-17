@@ -19,12 +19,18 @@ class PhotoResultsViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private static let accessKey = "wG_IpOt9zfdqTl-pM5kMddbDefK5fRE9LiTM_mIaDtc"
     
+    func trimSearchWord(word: String) -> String {
+        return word.filter { !$0.isWhitespace }
+    }
+    
     func getPhotoData(seacrhWord: String) {
         
         isLoading = true
         errorMessage = nil
         
-        NetworkManager.shared.getData(query: seacrhWord, id: PhotoResultsViewModel.accessKey, type: Photo.self)
+        let trimmedWord = trimSearchWord(word: seacrhWord)
+        
+        NetworkManager.shared.getData(query: trimmedWord, id: PhotoResultsViewModel.accessKey, type: Photo.self)
             .sink { [self] completion in
                 isLoading = false
                 searchWord = seacrhWord

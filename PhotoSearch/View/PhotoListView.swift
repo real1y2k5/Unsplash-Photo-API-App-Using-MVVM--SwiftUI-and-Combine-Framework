@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct PhotoListView: View {
-    @ObservedObject var photoResultsViewModel: PhotoResultsViewModel
+    @StateObject var photoResultsViewModel: PhotoResultsViewModel
     @State private var searchText = ""
     
     var body: some View {
@@ -24,8 +24,7 @@ struct PhotoListView: View {
             .searchable(text: $searchText)
             .onSubmit(of: .search) {
                 if searchText.count >  0 {
-                    let trimmed = searchText.filter { !$0.isWhitespace }
-                    photoResultsViewModel.getPhotoData(seacrhWord: trimmed)
+                    photoResultsViewModel.getPhotoData(seacrhWord: searchText)
                 }
             }
         }
