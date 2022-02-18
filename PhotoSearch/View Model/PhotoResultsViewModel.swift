@@ -19,16 +19,12 @@ class PhotoResultsViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private static let accessKey = "wG_IpOt9zfdqTl-pM5kMddbDefK5fRE9LiTM_mIaDtc"
     
-    func trimSearchWord(word: String) -> String {
-        return word.filter { !$0.isWhitespace }
-    }
-    
     func getPhotoData(seacrhWord: String) {
         
         isLoading = true
         errorMessage = nil
         
-        let trimmedWord = trimSearchWord(word: seacrhWord)
+        let trimmedWord = seacrhWord.filter { !$0.isWhitespace }
         
         if trimmedWord.isEmpty {
             isLoading = false
