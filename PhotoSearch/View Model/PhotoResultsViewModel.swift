@@ -14,7 +14,6 @@ class PhotoResultsViewModel: ObservableObject {
     @Published var photoResult = [PhotoResult]()
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
-    @Published var searchWord: String? = nil
     
     private var cancellables = Set<AnyCancellable>()
     private static let accessKey = "wG_IpOt9zfdqTl-pM5kMddbDefK5fRE9LiTM_mIaDtc"
@@ -31,12 +30,11 @@ class PhotoResultsViewModel: ObservableObject {
             errorMessage = "Please enter a valid search word"
         } else {
             NetworkManager.shared.getData(query: trimmedWord, id: PhotoResultsViewModel.accessKey, type: Photo.self)
-                .sink { [self] completion in
-                    isLoading = false
-                    searchWord = seacrhWord
+                .sink { [weak self] completion in
+                    self?.isLoading = false
                     switch completion {
                     case .failure(let err):
-                        errorMessage = err.localizedDescription
+                        self?.errorMessage = err.localizedDescription
                         print("Error is \(err.localizedDescription)")
                     case .finished:
                         print("Finished")
@@ -53,5 +51,17 @@ class PhotoResultsViewModel: ObservableObject {
         }
         .store(in: &cancellables)
         }
+    }
+    
+    func removeItem(at offsets: IndexSet) {
+        photoResult.remove(atOffsets: offsets)
+    }
+    
+    func moveItem(from: IndexSet, to: Int) {
+        photoResult.move(fromOffsets: from, toOffset: to)
+    }
+    
+    func filterPhotoResult(byText: String) -> [PhotoResult] {
+        return byText.count > 0 ? photoResult.filter { ($0.description?.lowercased() ?? "").contains(byText.lowercased()) } : photoResult
     }
 }

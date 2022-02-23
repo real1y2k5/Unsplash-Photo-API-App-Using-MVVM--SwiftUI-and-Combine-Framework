@@ -21,7 +21,7 @@ struct PhotoSearchView: View {
                 .navigationTitle("Photo Search")
                 .searchable(text: $searchText)
                 .onSubmit(of: .search) {
-                    photoResultsViewModel.getPhotoData(seacrhWord: searchText)
+                        photoResultsViewModel.getPhotoData(seacrhWord: searchText)
                 }
         }
         

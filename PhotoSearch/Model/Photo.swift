@@ -13,7 +13,7 @@ struct Photo: Codable {
     
 }
 
-struct PhotoResult: Codable {
+struct PhotoResult: Codable, Identifiable {
     let id: String?
     let description: String?
     let likes: Int?
