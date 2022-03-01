@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var photoResultsViewModel = PhotoResultsViewModel()
+    @StateObject var photoResultsViewModel = PhotoResultsViewModel(service: APIDataService())
     
     var body: some View {
         if photoResultsViewModel.isLoading {
             LoadingView()
         } else if photoResultsViewModel.errorMessage != nil {
             ErrorView(photoResultsViewModel: photoResultsViewModel)
-        } else if photoResultsViewModel.photoResult.count > 0 {
+        } else if !photoResultsViewModel.photoResult.isEmpty {
             PhotoListView(photoResultsViewModel: photoResultsViewModel)
         } else {
             PhotoSearchView(photoResultsViewModel: photoResultsViewModel)

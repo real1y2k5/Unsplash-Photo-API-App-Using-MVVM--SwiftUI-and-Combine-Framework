@@ -30,6 +30,6 @@ struct ErrorView: View {
 
 struct ErrorView_Previews: PreviewProvider {
     static var previews: some View {
-        ErrorView(photoResultsViewModel: PhotoResultsViewModel())
+        ErrorView(photoResultsViewModel: PhotoResultsViewModel(service: APIDataService()))
     }
 }

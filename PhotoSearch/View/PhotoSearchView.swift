@@ -24,12 +24,11 @@ struct PhotoSearchView: View {
                         photoResultsViewModel.getPhotoData(seacrhWord: searchText)
                 }
         }
-        
     }
 }
 
 struct PhotoSearchView_Previews: PreviewProvider {
     static var previews: some View {
-        PhotoSearchView(photoResultsViewModel: PhotoResultsViewModel())
+        PhotoSearchView(photoResultsViewModel: PhotoResultsViewModel(service: APIDataService()))
     }
 }

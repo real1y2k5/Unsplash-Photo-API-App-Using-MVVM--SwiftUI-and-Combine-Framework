@@ -11,9 +11,6 @@ import Combine
 
 class PhotoSearchViewModelTests: XCTestCase {
     
-    let dummyResponse =  Photo(results: [PhotoResult(id: "eOLpJjhkgbsQ", description: "Yet another photo.", likes: 20, urls: PhotoURL(regular: "https://images.unsplash.com/photo-1416339kjggklhefd36f?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&s=92f3e02f63678acc8416d044e189f515")),
-                                         PhotoResult(id: "eOLpJytrbsQ", description: "A man drinking a coffee.", likes: 286, urls: PhotoURL(regular: "https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?ixlib=rb-0.3.5&q=80&fm=jpg&crkjjhkhkb&w=1080&fit=max&s=92f3e02f63678acc8416d044e189f515"))])
-    
     var subscriptions = Set<AnyCancellable>()
     
     override func setUp() {
@@ -24,52 +21,56 @@ class PhotoSearchViewModelTests: XCTestCase {
     }
     
     func testGetPhotoSuccess() {
+        let result = Result<Photo, APIError>.success(Photo.dummyResponse())
+        let viewModel = PhotoResultsViewModel(service: APIDataServiceMock(result: result))
+        viewModel.getPhotoData(seacrhWord: "Test")
+        let promise = expectation(description: "Getting Photos")
         
+        viewModel.$photo.sink { photo in
+            if photo.results?.count == 2 {
+                promise.fulfill()
+            }
+        }.store(in: &subscriptions)
+        
+        wait(for: [promise], timeout: 2)
+        
+    }
+    
+    func testGetPhotoSuccessEmptyResponse() {
+        let result = Result<Photo, APIError>.success(Photo(results: []))
+        let viewModel = PhotoResultsViewModel(service: APIDataServiceMock(result: result))
+        viewModel.getPhotoData(seacrhWord: "Test")
+        let promise = expectation(description: "Getting Photos")
+        
+        viewModel.$photo.sink { photo in
+            if ((photo.results?.isEmpty) != nil) {
+                promise.fulfill()
+            }
+        }.store(in: &subscriptions)
+        
+        wait(for: [promise], timeout: 2)
     }
     
     func testGetPhotoFailure() {
+        let result = Result<Photo, APIError>.failure(APIError.badURL)
+        let viewModel = PhotoResultsViewModel(service: APIDataServiceMock(result: result))
+        viewModel.getPhotoData(seacrhWord: "Test")
+        let promise = expectation(description: "Getting Photos")
         
-    }
-    
-    func test_searchWord_isNil() {
-        let vm = PhotoResultsViewModel()
-        vm.searchWord = nil
-        XCTAssertNil(vm.searchWord)
-    }
-    
-    func test_searchWord_isNotNil() {
-        let vm = PhotoResultsViewModel()
-        vm.searchWord = "Toys"
-        XCTAssertEqual(vm.searchWord, "Toys")
-    }
-    
-    func test_errorMessage_isNil() {
-        let vm = PhotoResultsViewModel()
-        vm.errorMessage = nil
-        XCTAssertNil(vm.errorMessage)
-    }
-    
-    func test_errorMessage_isNotNil() {
-        let vm = PhotoResultsViewModel()
-        vm.errorMessage = "some error message"
-        XCTAssertEqual(vm.errorMessage, "some error message")
-    }
-    
-    func test_isLoading_equalsInjectedValue() {
-        let value: Bool = Bool.random()
-        let vm = PhotoResultsViewModel()
-        vm.isLoading = value
-        XCTAssertEqual(vm.isLoading, value)
-    }
-    
-    func test_isLoading_equalsInjectedValue_StressTest() {
+        viewModel.$photo.sink { photo in
+            if let results = photo.results, !results.isEmpty {
+                XCTFail()
+            }
+        }.store(in: &subscriptions)
         
-        for _ in 0..<10 {
-            let value: Bool = Bool.random()
-            let vm = PhotoResultsViewModel()
-            vm.isLoading = value
-            XCTAssertEqual(vm.isLoading, value)
-        }
+        viewModel.$errorMessage.sink { message in
+            if message != nil {
+                promise.fulfill()
+            }
+        }.store(in: &subscriptions)
+        
+        wait(for: [promise], timeout: 2)
+        
     }
 }
 

@@ -4,19 +4,27 @@
 //
 //  Created by Ridwan Ayinla  on 11/02/2022.
 //
+// PhotoResultsViewModel handling the logic for photo seeacrh and photo result view
 
 import Foundation
-import Combine
-import UIKit
 
 class PhotoResultsViewModel: ObservableObject {
     
-    @Published var photoResult = [PhotoResult]()
+    private static let baseURL = "https://api.unsplash.com/search/photos?page=1&per_page=50&query="
+    private static let accessKey = "wG_IpOt9zfdqTl-pM5kMddbDefK5fRE9LiTM_mIaDtc"
+    private static let seacrhWordError = "Please enter a search word"
+    private static let noImageError = "Sorry, No images found"
+    
+    @Published var photo: Photo = Photo(results: [])
+    @Published var photoResult: [PhotoResult] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     
-    private var cancellables = Set<AnyCancellable>()
-    private static let accessKey = "wG_IpOt9zfdqTl-pM5kMddbDefK5fRE9LiTM_mIaDtc"
+    let dataService: APIDataServiceProtocol
+    
+    init(service: APIDataServiceProtocol) {
+        self.dataService = service
+    }
     
     func getPhotoData(seacrhWord: String) {
         
@@ -24,32 +32,29 @@ class PhotoResultsViewModel: ObservableObject {
         errorMessage = nil
         
         let trimmedWord = seacrhWord.filter { !$0.isWhitespace }
-        
         if trimmedWord.isEmpty {
             isLoading = false
-            errorMessage = "Please enter a valid search word"
+            errorMessage = PhotoResultsViewModel.seacrhWordError
         } else {
-            NetworkManager.shared.getData(query: trimmedWord, id: PhotoResultsViewModel.accessKey, type: Photo.self)
-                .sink { [weak self] completion in
+            let urlString = PhotoResultsViewModel.baseURL + "\(trimmedWord)&client_id=\(PhotoResultsViewModel.accessKey)"
+            self.dataService.getPhotoData(url: urlString) { [weak self] result in
+                DispatchQueue.main.async {
                     self?.isLoading = false
-                    switch completion {
-                    case .failure(let err):
-                        self?.errorMessage = err.localizedDescription
-                        print("Error is \(err.localizedDescription)")
-                    case .finished:
-                        print("Finished")
+                    switch result {
+                    case .failure(let error):
+                        self?.errorMessage = error.localizedDescription
+                    case .success(let photo):
+                        guard let results = photo.results else { return }
+                        if results.isEmpty {
+                            self?.errorMessage = PhotoResultsViewModel.noImageError
+                        } else {
+                            self?.photo = photo
+                            self?.photoResult = results
+                            
+                        }
                     }
                 }
-        receiveValue: { [weak self] photoData in
-            guard let results = photoData.results else { return }
-            
-            if results.count > 0 {
-                self?.photoResult = results
-            } else {
-                self?.errorMessage = "Sorry, No images found"
             }
-        }
-        .store(in: &cancellables)
         }
     }
     
